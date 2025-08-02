@@ -1,22 +1,28 @@
 ﻿AppType=JavaFX
 Build1=Default,b4j.example
 File1=MainPage.bjl
-FileGroup1=New Group
-Group=Default Group
-Library1=jcore
-Library2=jfx
-Library3=b4xpages
+FileGroup1=Default Group
+Group=App
+Library1=b4xpages
+Library2=jcore
+Library3=jfx
+Library4=jrandomaccessfile
+Library5=jserial
+Library6=xui views
+Library7=jsql
 Module1=|relative|..\B4XMainPage
+Module2=|relative|..\EscPosPrinter
 NumberOfFiles=1
-NumberOfLibraries=3
-NumberOfModules=1
+NumberOfLibraries=7
+NumberOfModules=2
 Version=10.3
 @EndOfDesignText@
 #Region Project Attributes 
-	#MainFormWidth: 600
-	#MainFormHeight: 600 
+	#MainFormWidth: 1270 
+	#MainFormHeight: 640
 #End Region
-
+#AdditionalJar: sqlite-jdbc-3.7.2
+#PackagerProperty: ExeName = Receipt Designer
 Sub Process_Globals
 	Private fx As JFX
 	Private MainForm As Form

@@ -1,5 +1,5 @@
 ﻿B4A=true
-Group=Default Group
+Group=Pages
 ModulesStructureVersion=1
 Type=Class
 Version=9.85
@@ -14,8 +14,11 @@ Version=9.85
 #End Region
 
 Sub Class_Globals
-	Private Root As B4XView
+	Public DB As SQL
 	Private xui As XUI
+	Private Root As B4XView
+	Private DBDir As String
+	Private DBFile As String
 End Sub
 
 Public Sub Initialize
