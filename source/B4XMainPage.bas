@@ -19,6 +19,14 @@ Sub Class_Globals
 	Private Root As B4XView
 	Private DBDir As String
 	Private DBFile As String
+	'Private chkItem As B4XView
+	'Private imgItem As B4XImageView
+	'Private lblFirstLine As B4XView
+	'Private lblSecondLine As B4XView
+	Private Label1 As B4XView
+	Private Label2 As B4XView
+	Private Label3 As B4XView
+	Private CLV1 As CustomListView
 End Sub
 
 Public Sub Initialize
@@ -29,6 +37,9 @@ End Sub
 Private Sub B4XPage_Created (Root1 As B4XView)
 	Root = Root1
 	Root.LoadLayout("MainPage")
+	For i = 0 To 9
+		CLV1.Add(CreateListItem("", CLV1.AsView.Width, 70dip), i)
+	Next
 End Sub
 
 #If B4A
@@ -53,3 +64,21 @@ Private Sub B4XPage_CloseRequest As ResumableSub
 	Return True
 End Sub
 #End If
+
+'Private Sub CreateListItem (FirstLine As String, SecondLine As String, Width As Int, Height As Int) As B4XView
+'	Dim p As B4XView = xui.CreatePanel("")
+'	p.LoadLayout("ListItem")
+'	p.SetLayoutAnimated(0, 0, 0, Width, Height)
+'	imgItem.Bitmap = xui.LoadBitmapResize(File.DirAssets, "icon.png", 40dip, 40dip, True)
+'	lblFirstLine.Text = FirstLine
+'	lblSecondLine.Text = SecondLine
+'	Return p
+'End Sub
+
+Private Sub CreateListItem (FirstLine As String, Width As Int, Height As Int) As B4XView
+	Dim p As B4XView = xui.CreatePanel("")
+	p.LoadLayout("LineItem")
+	p.SetLayoutAnimated(0, 0, 0, Width, Height)
+	Label2.Text = FirstLine
+	Return p
+End Sub
