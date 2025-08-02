@@ -13,10 +13,12 @@ Library5=jserial
 Library6=xui views
 Library7=jsql
 Module1=|relative|..\B4XMainPage
-Module2=|relative|..\EscPosPrinter
+Module2=|relative|..\Code
+Module3=|relative|..\EscPosEncoder
+Module4=|relative|..\EscPosPrinter
 NumberOfFiles=2
 NumberOfLibraries=7
-NumberOfModules=2
+NumberOfModules=4
 Version=10.3
 @EndOfDesignText@
 #Region Project Attributes 

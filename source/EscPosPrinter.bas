@@ -26,33 +26,36 @@ Sub Class_Globals
 	Private Connected As Boolean
 	Private ConnectedError As String
 	
-	Dim ESC As String = Chr(27)
-	Dim FS As String = Chr(28)	'ignore
-	Dim GS As String = Chr(29)
+	Public Encoder As EscPosEncoder
+	'Dim ESC As String = Chr(27)
+	'Dim FS As String = Chr(28)	'ignore
+	'Dim GS As String = Chr(29)
+	'Dim AT As String = Chr(64) ' @
+	'Dim EXC	As String = Chr(33) ' !
 	
 	'Bold and underline don't work well in reversed text
-	Dim UNREVERSE As String  = GS & "B" & Chr(0)
-	Dim REVERSE As String = GS & "B" & Chr(1)	'ignore
+	Dim UNREVERSE As String = Code.GS & "B" & Chr(0)
+	Dim REVERSE As String = Code.GS & "B" & Chr(1)	'ignore
 	
 	' Character orientation. Print upside down from right margin
-	Dim UNINVERT As String = ESC & "{0"
-	Dim INVERT As String = ESC & "{1"	'ignore
+	Dim UNINVERT As String = Code.ESC & "{0"
+	Dim INVERT As String = Code.ESC & "{1"	'ignore
 	
 	' Character rotation clockwise. Not much use without also reversing the printed character sequence
-	Dim UNROTATE As String = ESC & "V0"
-	Dim ROTATE As String = ESC & "V1"	'ignore
+	Dim UNROTATE As String = Code.ESC & "V0"
+	Dim ROTATE As String = Code.ESC & "V1"	'ignore
 	
 	' Horizontal tab
 	Dim HT As String = Chr(9) 'ignore
 	
 	' Character underline
-	Dim ULINE0 As String = ESC & "-0"
-	Dim ULINE1 As String = ESC & "-1"	'ignore
-	Dim ULINE2 As String = ESC & "-2"	'ignore
+	Dim ULINE0 As String = Code.ESC & "-0"
+	Dim ULINE1 As String = Code.ESC & "-1"	'ignore
+	Dim ULINE2 As String = Code.ESC & "-2"	'ignore
 	
 	' Character emphasis
-	Dim BOLD As String = ESC & "E1"		'ignore
-	Dim NOBOLD As String = ESC & "E0"
+	Dim BOLD As String = Code.ESC & "E1"		'ignore
+	Dim NOBOLD As String = Code.ESC & "E0"
 	
 	' Character height and width
 	Dim SINGLE As String = GS & "!" & Chr(0x00) 'ignore
@@ -61,13 +64,13 @@ Sub Class_Globals
 	Dim HIGHWIDE As String = GS & "!" & Chr(0x11) 'ignore
 	
 	' Default settings
-	Private LEFTJUSTIFY As String = ESC & "a0"
-	Private LINEDEFAULT As String = ESC & "2"
-	Private LINSET0 As String = ESC & "$" & Chr(0x0) & Chr(0x0)
+	Private LEFTJUSTIFY As String = Code.ESC & "a0"
+	Private LINEDEFAULT As String = Code.ESC & "2"
+	Private LINSET0 As String = Code.ESC & "$" & Chr(0x0) & Chr(0x0)
 	Private LMARGIN0 As String = GS & "L" & Chr(0x0) & Chr(0x0)
 	Private WIDTH0 As String = GS & "W" & Chr(0xff) & Chr(0xff)
-	Private CHARSPACING0 As String = ESC & " " & Chr(0)
-	Private CHARFONT0 As String = ESC & "M" & Chr(0)
+	Private CHARSPACING0 As String = Code.ESC & " " & Chr(0)
+	Private CHARFONT0 As String = Code.ESC & "M" & Chr(0)
 	Dim DEFAULTS As String =  CHARSPACING0 & CHARFONT0 & LMARGIN0 & WIDTH0 & LINSET0 & LINEDEFAULT & LEFTJUSTIFY _
 		& UNINVERT & UNROTATE & UNREVERSE & NOBOLD & ULINE0		'ignore
 	#If B4A
@@ -85,6 +88,7 @@ End Sub
 Public Sub Initialize (vCallback As Object, vEventName As String)
 	EventName = vEventName
 	CallBack = vCallback
+	Encoder.Initialize
 	Serial1.Initialize("Serial1")
 	Connected = False
 	ConnectedError = ""
@@ -214,7 +218,8 @@ End Sub
 
 ' Reset the printer to the power on state
 Public Sub Reset
-	WriteString(ESC & "@")
+	'WriteString(ESC & "@")
+	WriteString(Encoder.E_RESET)
 End Sub
 
 '--------------
@@ -224,16 +229,18 @@ End Sub
 ' Print any outstanding characters then feed the paper the specified number of units of 0.125mm
 ' This is similar to changing LineSpacing before sending CRLF but this has a one off effect
 ' A full character height is always fed even if units = 0. Units defines the excess over this minimum
-Public Sub PrintAndFeedPaper(units As Int)
-	WriteString(ESC & "J")
+Public Sub PrintAndFeedPaper (units As Int)
+	'WriteString(ESC & "J")
+	WriteString(Code.ESC & Code.J)
 	Dim params(1) As Byte
 	params(0) = units
 	WriteBytes(params)
 End Sub
 
 ' Set the distance between characters
-Public Sub setCharacterSpacing(spacing As Int)
-	WriteString(ESC & " ")
+Public Sub setCharacterSpacing (spacing As Int)
+	'WriteString(ESC & " ")
+	WriteString(Code.ESC & Code.Space)
 	Dim params(1) As Byte
 	params(0) = spacing
 	WriteBytes(params)
@@ -245,7 +252,8 @@ End Sub
 Public Sub setLeftInset(inset As Int)
 	Dim dh As Int = inset / 256
 	Dim dl As Int = inset - dh
-	WriteString(ESC & "$" & Chr(dl) & Chr(dh))
+	'WriteString(ESC & "$" & Chr(dl) & Chr(dh))
+	WriteString(Code.ESC & Code.Dollar & Chr(dl) & Chr(dh))
 	Dim params(2) As Byte
 	params(0) = dl
 	params(1) = dh
@@ -258,7 +266,8 @@ End Sub
 Public Sub setLeftMargin(margin As Int)
 	Dim dh As Int = margin / 256
 	Dim dl As Int = margin - dh
-	WriteString(GS & "L")
+	'WriteString(GS & "L")
+	WriteString(Code.GS & Code.L)
 	Dim params(2) As Byte
 	params(0) = dl
 	params(1) = dh
@@ -272,7 +281,8 @@ End Sub
 Public Sub setPrintWidth(width As Int)
 	Dim dh As Int = width / 256
 	Dim dl As Int = width - dh
-	WriteString(GS & "W")
+	'WriteString(GS & "W")
+	WriteString(Code.GS & Code.W)
 	Dim params(2) As Byte
 	params(0) = dl
 	params(1) = dh
@@ -283,9 +293,11 @@ End Sub
 ' If spacing is < 0 then the default of 30 is set
 Public Sub setLineSpacing(spacing As Int)
 	If spacing < 0 Then
-		WriteString(ESC & "2")
+		'WriteString(ESC & "2")
+		WriteString(Code.ESC & Code.Num2)
 	Else
-		WriteString(ESC & "3")
+		'WriteString(ESC & "3")
+		WriteString(Code.ESC & Code.Num3)
 		Dim params(1) As Byte
 		params(0) = spacing
 		WriteBytes(params)
@@ -294,25 +306,37 @@ End Sub
 	
 ' Set the line content justification, must be the first item on a new line
 ' 0 left, 1 centre, 2 right
-Public Sub setJustify(justify As Int)
-	WriteString(ESC & "a" & Chr(justify + 48))
+Public Sub setJustify (justify As Int)
+	'WriteString(ESC & "a" & Chr(justify + 48))
+	Select justify
+		Case 0
+			WriteString(Encoder.E_JUSTIFY_LEFT)
+		Case 1
+			WriteString(Encoder.E_JUSTIFY_CENTER)
+		Case 2
+			WriteString(Encoder.E_JUSTIFY_RIGHT)
+	End Select
 End Sub
 
 ' Set the codepage of the printer
 ' You need to look at the printer documentation to establish which codepages are supported
-Public Sub setCodePage(codepage As Int)	
-	WriteString(ESC & "t")
+Public Sub setCodePage (codepage As Int)
+	'WriteString(ESC & "t")
+	WriteString(Code.ESC & Code.LC_t)
 	Dim params(1) As Byte
 	params(0) = codepage
 	WriteBytes(params)
 End Sub
 
-' Select the size of the font for printing text. 0 = Font A (12 x 24), 1 = Font B (9 x 17)
+' Select the size of the font for printing text.
+' 0 = Font A (12 x 24)
+' 1 = Font B (9 x 17)
 ' For font B you may want to set the line spacing to a lower value than the default of 30
 ' This affects only the size of printed characters. The code page determines the actual character set
 ' On my printer setting UseCustomCharacters = while Font B is selected crashes the printer and turns it off
-Public Sub setCharacterFont(font As Int)
-	WriteString(ESC & "M" & Chr(Bit.And(1,font)))
+Public Sub setCharacterFont (font As Int)
+	'WriteString(ESC & "M" & Chr(Bit.And(1, font)))
+	WriteString(Code.ESC & Code.M & Chr(Bit.And(1, font)))
 End Sub
 
 ' Set the positions of the horizontal tabs
@@ -320,7 +344,8 @@ End Sub
 ' There may be up to 32 tab positions specified each of size up to 255 characters
 ' The printer default is that no tabs are defined
 Public Sub setTabPositions(tabs() As Int)
-	WriteString(ESC & "D")
+	'WriteString(ESC & "D")
+	WriteString(Code.ESC & Code.D)
 	Dim data(tabs.Length+1) As Byte
 	For i = 0 To tabs.Length - 1
 		data(i) = tabs(i)
@@ -336,7 +361,8 @@ End Sub
 Public Sub setRelativePrintPosn(relposn As Int)
 	Dim dh As Int = relposn / 256
 	Dim dl As Int = relposn - dh
-	WriteString(ESC & "\")
+	'WriteString(ESC & "\")
+	WriteString(Code.ESC & Code.BackSlash)
 	Dim params(2) As Byte
 	params(0) = dl
 	params(1) = dh
@@ -387,7 +413,7 @@ End Sub
 ' This command deletes the pattern defined for the specified code in the font selected by ESC !
 ' If the code is subsequently printed in custom character mode the present code page character is printed instead
 Public Sub DeleteCustomCharacter(charcode As Int)
-	WriteString(ESC & "?")
+	WriteString(Code.ESC & Code.Question)
 	Dim params(1) As Byte
 	params(0) = charcode
 	WriteBytes(params)	
@@ -400,9 +426,11 @@ End Sub
 ' Therefore the cuatom character routines have not been tested on ont B
 Public Sub setUseCustomCharacters(custom As Boolean)
 	If custom Then
-		WriteString(ESC & "%1")
+		'WriteString(ESC & "%1")
+		WriteString(Code.ESC & Code.Percent & Code.Num1)
 	Else
-		WriteString(ESC & "%0")
+		'WriteString(ESC & "%0")
+		WriteString(Code.ESC & Code.Percent & Code.Num0)
 	End If
 End Sub
 
@@ -425,7 +453,8 @@ Public Sub DefineCustomCharacter(charcode As Int, bitdata() As Byte) As Int
 	Dim excess As Int = bitdata.Length Mod 3
 	If excess <> 0 Then Return -1
 	Dim size As Int = bitdata.Length / 3
-	WriteString(ESC & "&")
+	'WriteString(ESC & "&")
+	WriteString(Code.ESC & Code.Ampersand)
 	Dim params(4) As Byte
 	params(0) = 3
 	params(1) = charcode
@@ -546,7 +575,7 @@ End Sub
 ' This is a higher level method that builds the Int values to pass to CreateCustomCharacter in the shapes array
 ' Create the value to draw a line in a custom character
 ' The line starts at X0,Y0 and ends at X1,Y1
-Public Sub CreateLine(x0 As Int, y0 As Int, x1 As Int, y1 As Int) As Int
+Public Sub CreateLine (x0 As Int, y0 As Int, x1 As Int, y1 As Int) As Int
 	Dim line As Int = 0
 	line = line + Bit.ShiftLeft(Bit.And(0xf,x0), 24)
 	line = line + Bit.ShiftLeft(Bit.And(0x1f,y0), 16)
@@ -559,7 +588,7 @@ End Sub
 ' Create the value to draw a circle in a custom character
 ' The circle is centred on X1,Y1 and the quadrants to draw are bit ORed together
 ' UpperRight = 0x1, LowerRight = 0x2, LowerLeft = 0x4, Upper Left = 0x8
-Public Sub CreateCircle(radius As Int, quadrants As Int, x1 As Int, y1 As Int, fill As Boolean) As Int
+Public Sub CreateCircle (radius As Int, quadrants As Int, x1 As Int, y1 As Int, fill As Boolean) As Int
 	Dim circle As Int = 0x20000000
 	If fill Then circle = circle + 0x80000000
 	circle = circle + Bit.ShiftLeft(radius, 24)
@@ -569,11 +598,10 @@ Public Sub CreateCircle(radius As Int, quadrants As Int, x1 As Int, y1 As Int, f
 	Return circle
 End Sub
 
-
 ' This is a higher level method that builds the Int values to pass to CreateCustomCharacter in the shapes array
 ' Create the value to draw a triangle in a custom character
 ' The triangles corners are at X0,Y0 X1,Y1 and X2,Y2
-Public Sub CreateTriangle(x0 As Int, y0 As Int, x1 As Int, y1 As Int, x2 As Int, y2 As Int, fill As Boolean) As Int
+Public Sub CreateTriangle (x0 As Int, y0 As Int, x1 As Int, y1 As Int, x2 As Int, y2 As Int, fill As Boolean) As Int
 	Dim triangle As Int = 0x30000000
 	If fill Then triangle = triangle + 0x80000000
 	triangle = triangle + Bit.ShiftLeft(Bit.And(0xf,x0), 24)
@@ -589,7 +617,7 @@ End Sub
 ' This is a higher level method that builds the Int values to pass to CreateCustomCharacter in the shapes array
 ' Create the value to draw a box in a custom character
 ' The box top left start is X0,Y0 and bottom right is X1,Y1
-Public Sub CreateBox(x0 As Int, y0 As Int, x1 As Int, y1 As Int, fill As Boolean) As Int
+Public Sub CreateBox (x0 As Int, y0 As Int, x1 As Int, y1 As Int, fill As Boolean) As Int
 	Dim box As Int = 0x10000000
 	If fill Then box = box + 0x80000000
 	box = box + Bit.ShiftLeft(Bit.And(0xf,x0), 24)
@@ -603,7 +631,7 @@ End Sub
 ' Private custom character drawing methods
 '-----------------------------------------
 
-Private Sub PlotTriangle(x0 As Int, y0 As Int, x1 As Int, y1 As Int, x2 As Int, y2 As Int, points(,) As Byte, Fill As Int)
+Private Sub PlotTriangle (x0 As Int, y0 As Int, x1 As Int, y1 As Int, x2 As Int, y2 As Int, points(,) As Byte, Fill As Int)
 	' This is a pretty crude algorithm, but it is simple, works and it isn't invoked often
 	PlotLine(x0, y0, x1, y1, points)
 	PlotLine(x1, y1, x2, y2, points)
@@ -613,7 +641,7 @@ Private Sub PlotTriangle(x0 As Int, y0 As Int, x1 As Int, y1 As Int, x2 As Int, 
 	End If
 End Sub
 
-Private Sub FillTriangle(x0 As Int, y0 As Int, x1 As Int, y1 As Int, x2 As Int, y2 As Int, points(,) As Byte)
+Private Sub FillTriangle (x0 As Int, y0 As Int, x1 As Int, y1 As Int, x2 As Int, y2 As Int, points(,) As Byte)
 	' first sort the three vertices by y-coordinate ascending so v0 Is the topmost vertice */
 	Dim tx, ty As Int
 	If y0 > y1 Then
@@ -680,7 +708,7 @@ Private Sub FillTriangle(x0 As Int, y0 As Int, x1 As Int, y1 As Int, x2 As Int, 
 	End If
 End Sub
 
-Private Sub PlotBox(x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) As Byte, Fill As Int)
+Private Sub PlotBox (x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) As Byte, Fill As Int)
 	' This is a pretty crude algorithm, but it is simple, works and itsn't invoked often
 	PlotLine(x0, y0, x0, y1, points)
 	PlotLine(x0, y0, x1, y0, points)
@@ -694,7 +722,7 @@ Private Sub PlotBox(x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) As Byt
 End Sub
 
 
-Private Sub PlotCircle(radius As Int, quadrants As Int, x1 As Int, y1 As Int, points(,) As Byte, fill As Int)
+Private Sub PlotCircle (radius As Int, quadrants As Int, x1 As Int, y1 As Int, points(,) As Byte, fill As Int)
 	' This is a pretty crude algorithm, but it is simple, works and itsn't invoked often
 	Dim mask As Int = 1
 	For q = 3 To 0 Step -1
@@ -715,7 +743,7 @@ Private Sub PlotCircle(radius As Int, quadrants As Int, x1 As Int, y1 As Int, po
 End Sub
 
 ' Bresenham's line algorithm - see Wikipedia
-Private Sub PlotLine(x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) As Byte )
+Private Sub PlotLine (x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) As Byte )
   If Abs(y1 - y0) < Abs(x1 - x0) Then
     If x0 > x1 Then
       PlotLineLow(x1, y1, x0, y0, points)
@@ -731,7 +759,7 @@ Private Sub PlotLine(x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) As By
   End If
 End Sub
 
-Private Sub PlotLineHigh(x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) As Byte )
+Private Sub PlotLineHigh (x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) As Byte )
   Dim dx As Int = x1 - x0
   Dim dy  As Int = y1 - y0
   Dim xi As Int = 1
@@ -751,7 +779,7 @@ Private Sub PlotLineHigh(x0 As Int, y0 As Int, x1 As Int, y1 As Int, points(,) A
 	Next
 End Sub
 	
-Private Sub	PlotLineLow(x0 As Int, y0 As Int, x1 As Int,y1 As Int, points(,) As Byte )
+Private Sub	PlotLineLow (x0 As Int, y0 As Int, x1 As Int,y1 As Int, points(,) As Byte )
   Dim dx As Int = x1 - x0
   Dim dy As Int = y1 - y0
   Dim yi As Int = 1
@@ -912,7 +940,7 @@ End Sub
 ' The printed pixels are square
 ' Returns status 0 : OK, -1 : too wide, -2 : too high, -3 : array too small
 ' The printer can take a long time to process the data and start printing
-Public Sub PrintImage(img As AnImage) As Int
+Public Sub PrintImage (img As AnImage) As Int
 	' max width = 72 ' 72mm/576 bits wide
 	' max height = 512 ' 64mm/512 bits high
 	If img.width > 72 Then Return -1
@@ -928,7 +956,7 @@ Public Sub PrintImage(img As AnImage) As Int
 	params(2) = xh
 	params(3) = yl
 	params(4) = yh
-	WriteString(GS & "v0")
+	WriteString(Code.GS & "v0")
 	WriteBytes(params)
 	WriteBytes(img.data)
 	WriteString(CRLF)
@@ -940,7 +968,7 @@ End Sub
 ' Each byte in the imagedata array is a single pixel valued zero or non-zero for white and black
 ' The returned array is 8 x smaller and packs 8 horizontal black or white pixels into each byte
 ' If the horizontal size of the image is not a multiple of 8 it will be truncated so that it is.
-Public Sub PackImage(imagedata As AnImage) As AnImage
+Public Sub PackImage (imagedata As AnImage) As AnImage
 	Dim xbytes As Int = imagedata.width/8
 	Dim pixels(xbytes * imagedata.height) As Byte
 	Dim masks(8) As Byte
@@ -1002,22 +1030,27 @@ End Sub
 '   Array size is 3 times the width
 '   Byte(n+0) is the highest, byte (n+2) us the lowest
 '   MSB of each byte is the highest image pixel, the LSB is the lowest
-Public Sub PrintImage2(width As Int, data() As Byte, highdensity As Boolean, dotds24 As Boolean) As Int
-	Dim d As String = Chr(0)
+Public Sub PrintImage2 (width As Int, data() As Byte, highdensity As Boolean, dotds24 As Boolean) As Int
+	'Dim d As String = Chr(0)
+	Dim d As String = Code.NUL
 	If Not(highdensity) And Not(dotds24 )	 Then
-		d = Chr(0)
+		'd = Chr(0)
+		d = Code.NUL
 		If width > 288 Then Return -1
 		If data.Length <> width Then Return -3
 	Else If highdensity And Not(dotds24) 	 Then
-		d = Chr(1)
+		'd = Chr(1)
+		d = Code.SOH
 		If width > 576 Then Return -1
 		If data.Length <> width Then Return -3
-	Else 	If Not(highdensity) And dotds24 	 Then
-		d = Chr(32)
+	Else If Not(highdensity) And dotds24 	 Then
+		'd = Chr(32)
+		d = Code.Space
 		If width > 288 Then Return -1
 		If data.Length <> width*3 Then Return -3
 	Else  ' highdensity And dotds24
-		d = Chr(33)
+		'd = Chr(33)
+		d = Code.Exclamation
 		If width > 576 Then Return -1
 		If data.Length <> width*3 Then Return -3
 	End If
@@ -1026,7 +1059,7 @@ Public Sub PrintImage2(width As Int, data() As Byte, highdensity As Boolean, dot
 	Dim params(2) As Byte
 	params(0) = xl
 	params(1) = xh
-	WriteString(ESC & "*" & d)
+	WriteString(Code.ESC & Code.Astericks & d)
 	WriteBytes(params)	
 	WriteBytes(data)
 	WriteString(CRLF)
@@ -1038,7 +1071,7 @@ End Sub
 ' Each byte in the imagedata array is a single pixel valued zero or non-zero for white and black
 ' The returned array packs 8 vertical black or white pixels into each byte
 ' If dots24 is True then the slice is 24 pixels high otherwise it is 8 pixels high
-Public Sub PackImageSlice(img As AnImage, slice As Int, dots24 As Boolean) As Byte()
+Public Sub PackImageSlice (img As AnImage, slice As Int, dots24 As Boolean) As Byte()
 	Dim bytes As Int = img.width
 	If dots24 Then
 		Dim pixels(bytes * 3) As Byte
@@ -1094,8 +1127,8 @@ End Sub
 
 ' Set the height of a 2D bar code as number of dots vertically, 1 to 255
 ' Automatically resets to the default after printing the barcode
-Public Sub setBarCodeHeight(height As Int)
-	WriteString(GS & "h")
+Public Sub setBarCodeHeight (height As Int)
+	WriteString(Code.GS & "h")
 	Dim params(1) As Byte
 	params(0) = height
 	WriteBytes(params)
@@ -1103,8 +1136,8 @@ End Sub
 
 ' Set the left inset of a 2D barcode, 0 to 255
 ' This does not reset on receipt of RESET
-Public Sub setBarCodeLeft(left As Int)
-	WriteString(GS & "x")
+Public Sub setBarCodeLeft (left As Int)
+	WriteString(Code.GS & "x")
 	Dim params(1) As Byte
 	params(0) = left
 	WriteBytes(params)
@@ -1113,8 +1146,8 @@ End Sub
 ' Set the width of each bar in a 2D barcode. width value is 2 to 6, default is 3
 ' 2 = 0.250, 3 - 0.375, 4 = 0.560, 5 = 0.625, 6 = 0.75
 ' Resets to default after printing the barcode
-Public Sub setBarCodeWidth(width As Int)
-	WriteString(GS & "w")
+Public Sub setBarCodeWidth (width As Int)
+	WriteString(Code.GS & "w")
 	Dim params(1) As Byte
 	params(0) = width
 	WriteBytes(params)
@@ -1124,8 +1157,8 @@ End Sub
 '0 Not printed, 1 Above the bar code, 2 Below the bar code, 3 Both above And below the bar code
 ' Automatically resets to the default of 0 after printing the barcode
 ' The docs say this can be Chr(0, 1 2 or 3) or "0" "1" "2" or "3" but the numeric characters don't work
-Public Sub setHriPosn(posn As Int)
-	WriteString(GS & "H")
+Public Sub setHriPosn (posn As Int)
+	WriteString(Code.GS & "H")
 	Dim params(1) As Byte
 	params(0) = posn
 	WriteBytes(params)
@@ -1135,8 +1168,8 @@ End Sub
 '0 Font A (12 x 24), 1 Font B (9 x 17)
 ' Automatically resets to the default of 0 after printing the barcode
 ' The docs say this can be Chr(0 or 1) or "0" or "1" but the numeric characters don't work
-Public Sub setHriFont(font As Int)
-	WriteString(GS & "f" & Chr(font))
+Public Sub setHriFont (font As Int)
+	WriteString(Code.GS & "f" & Chr(font))
 End Sub
 
 ' If given invalid data no barcode is printed, only strange characters 
@@ -1151,11 +1184,11 @@ End Sub
 '       G | CODABAR| 3 to 255 characters  | 0 to 9, A to D, $ + - . / : |  needs any of A,B,C or D at the start and end
 '       H | CODE93 | 1 to 255 characters  | Same as CODE39
 '       I | CODE128| 2 to 255 characters  | entire 7 bit ASCII set
-Public Sub WriteBarCode(bartype As String, data As String)
+Public Sub WriteBarCode (bartype As String, data As String)
 	Dim databytes() As Byte = data.GetBytes("ASCII")
 	Dim dlow As Int = databytes.Length
 	Log("Barcode " & bartype & ", Size " & dlow & ", " & data)
-	WriteString(GS & "k" & bartype.ToUpperCase.CharAt(0))
+	WriteString(Code.GS & "k" & bartype.ToUpperCase.CharAt(0))
 	Dim params(1) As Byte
 	params(0) = dlow
 	WriteBytes(params)
@@ -1167,16 +1200,17 @@ End Sub
 ' size = 1 is 21x21, 2 = 25x25 ... size 40 = 177x177
 ' EC is error correction level, "L"(7%) or "M"(15%) or "Q"(25%) or "H"(30%)
 ' scale is 1 to 8, 1 is smallest, 8 is largest
-Public Sub WriteQRCode(size As Int, EC As String, scale As Int, data As String)
+Public Sub WriteQRCode (size As Int, EC As String, scale As Int, data As String)
 	Dim databytes() As Byte = data.GetBytes("ISO-8859-1")
 	Dim dhigh As Int = databytes.Length / 256
-	Dim dlow As Int = databytes.Length - dhigh*256
+	Dim dlow As Int = databytes.Length - dhigh * 256
 	Log("QR Code : Size " & size & ", EC " & EC & ", Scale " & scale & ", Size " & dlow & " " & dhigh & " : Data = " & data)
 	Dim params(3) As Byte
 	params(0) = scale
 	params(1) = dlow
 	params(2) = dhigh
-	WriteString(ESC & "Z" & Chr(size) & EC.ToUpperCase.CharAt(0))
+	'WriteString(ESC & "Z" & Chr(size) & EC.ToUpperCase.CharAt(0))
+	WriteString(Code.ESC & Code.Z & Chr(size) & EC.ToUpperCase.CharAt(0))
 	WriteBytes(params)
 	WriteBytes(databytes)
 End Sub
