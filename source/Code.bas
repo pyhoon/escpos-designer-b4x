@@ -15,11 +15,11 @@ Sub Process_Globals
 '	Public ACK As String = Chr(6)
 '	Public BEL As String = Chr(7)
 '	Public BS As String = Chr(8)
-'	Public HT As String = Chr(9)
-'	Public LF As String = Chr(10)
+	Public HT As String = Chr(9)
+	Public LF As String = Chr(10)
 '	Public VT As String = Chr(11)
 '	Public FF As String = Chr(12)
-'	Public CR As String = Chr(13)
+	Public CR As String = Chr(13)
 '	Public SO As String = Chr(14)
 '	Public SI As String = Chr(15)
 '	Public DLE As String = Chr(16)
@@ -63,7 +63,7 @@ Sub Process_Globals
 	
 	Public Question As String = Chr(63) ' ?
 	Public At As String = Chr(64) ' @
-	Public UC_A As String = Chr(65) ' A
+	Public A As String = Chr(65) ' A
 	Public B As String = Chr(66) ' B
 	Public C As String = Chr(67) ' C
 	Public D As String = Chr(68) ' D
