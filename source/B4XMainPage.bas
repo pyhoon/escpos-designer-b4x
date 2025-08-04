@@ -14,11 +14,12 @@ Version=9.85
 #End Region
 
 Sub Class_Globals
-	Public DB As SQL
+	Public DB As MiniORM
+	Private Conn As ORMConnector
 	Private xui As XUI
 	Private Root As B4XView
-	Private DBDir As String
-	Private DBFile As String
+	'Private DBDir As String
+	'Private DBFile As String
 	'Private chkItem As B4XView
 	'Private imgItem As B4XImageView
 	'Private lblFirstLine As B4XView
@@ -37,9 +38,58 @@ End Sub
 Private Sub B4XPage_Created (Root1 As B4XView)
 	Root = Root1
 	Root.LoadLayout("MainPage")
-	For i = 0 To 9
-		CLV1.Add(CreateListItem("", CLV1.AsView.Width, 70dip), i)
+	Conn.Initialize(CreateConnInfo)
+	If Conn.DBExist = False Then
+		Wait For (Conn.DBCreate) Complete (Success As Boolean)
+		Log(Success)
+		DB.Initialize(DBType, DBOpen)
+		DB.QueryAddToBatch = True
+		DB.ShowExtraLogs = True
+		DB.Table = "Lines"
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Text")))
+		DB.Create
+		DB.Table = "Tags"
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Text")))
+		DB.Create
+		DB.Columns = Array("Text")
+		Dim Tags As Map = EscPos.Tags
+		For Each key As String In Tags.Keys
+			DB.Insert2(Array(key))
+		Next
+		Wait For (DB.ExecuteBatch) Complete (Success As Boolean)
+		If Success Then
+			Log(Success)
+		Else
+			Log(LastException)
+		End If
+		DBClose
+	End If
+	DB.Initialize(DBType, DBOpen)
+	DB.Table = "Tags"
+	DB.Query
+	For Each row As Map In DB.Results
+		CLV1.Add(CreateListItem(row.Get("Text"), CLV1.AsView.Width, 70dip), row.Get("id"))
 	Next
+	DB.Close
+End Sub
+
+Private Sub CreateConnInfo As ConnectionInfo
+	Dim con As ConnectionInfo
+	con.Initialize
+	con.DBType = "SQLITE"
+	Return con
+End Sub
+
+Private Sub DBType As String
+	Return Conn.DBType
+End Sub
+
+Private Sub DBOpen As SQL
+	Return Conn.DBOpen
+End Sub
+
+Private Sub DBClose
+	Conn.DBClose
 End Sub
 
 #If B4A
