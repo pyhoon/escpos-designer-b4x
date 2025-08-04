@@ -207,17 +207,25 @@ End Sub
 Public Sub Custom As Map
 	Dim M3 As Map
 	M3.Initialize
-	M3.Put("[CLEAR]", "[ESC][@]")
-	M3.Put("[LINEFEED]", "[CR][LF]")
-	M3.Put("[LEFT]", "[ESC][a][NUL]")
-	M3.Put("[CENTER]", "[ESC][a][SOH]")
-	M3.Put("[RIGHT]", "[ESC][a][STX]")
-	M3.Put("[BOLD]", "[ESC][E][1]")
-	M3.Put("[UNBOLD]", "[ESC][E][0]")
-	M3.Put("[SINGLE]", "[ESC][!][0]")
-	M3.Put("[HIGH]", "[ESC][!][1]")
-	M3.Put("[WIDE]", "[ESC][!][2]")
-	M3.Put("[HIGHWIDE]", "[ESC][!][3]")
+	M3.Put("[CLEAR]", 		"[ESC][@]") ' Initialize printer
+	M3.Put("[LINEFEED]", 	"[CR][LF]")
+	M3.Put("[LEFT]", 		"[ESC][a][NUL]")
+	M3.Put("[CENTER]", 		"[ESC][a][SOH]")
+	M3.Put("[RIGHT]", 		"[ESC][a][STX]")
+	M3.Put("[BOLD]", 		"[ESC][E][1]")
+	M3.Put("[BOLDOFF]", 	"[ESC][E][0]")
+	M3.Put("[ROTATE]", 		"[ESC][V][1]")
+	M3.Put("[ROTATEOFF]", 	"[ESC][V][0]")
+	M3.Put("[INVERT]", 		"[ESC][{][1]")
+	M3.Put("[INVERTOFF]", 	"[ESC][{][0]")
+	M3.Put("[SINGLE]", 		"[GS][!][0]")
+	M3.Put("[HIGH]", 		"[GS][!][1]")
+	M3.Put("[WIDE]", 		"[GS][!][2]")
+	M3.Put("[HIGHWIDE]", 	"[GS][!][3]")
+	M3.Put("[FULLCUT]", 	"[GS][V][NUL]")
+	M3.Put("[PARTIALCUT]", 	"[GS][V][SOH]")
+	M3.Put("[FONTA]", 		"[ESC][M][0]")
+	M3.Put("[FONTB]", 		"[ESC][M][1]")
 	Return M3
 End Sub
 

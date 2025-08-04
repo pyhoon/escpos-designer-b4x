@@ -18,16 +18,11 @@ Sub Class_Globals
 	Private Conn As ORMConnector
 	Private xui As XUI
 	Private Root As B4XView
-	'Private DBDir As String
-	'Private DBFile As String
-	'Private chkItem As B4XView
-	'Private imgItem As B4XImageView
-	'Private lblFirstLine As B4XView
-	'Private lblSecondLine As B4XView
-	Private Label1 As B4XView
-	Private Label2 As B4XView
-	Private Label3 As B4XView
+	Private Icon1 As B4XView
+	Private Icon2 As B4XView
+	Private LblText As B4XView
 	Private CLV1 As CustomListView
+	Type LineItem (Text As String, TypeId As Int, Active As Boolean)
 End Sub
 
 Public Sub Initialize
@@ -38,6 +33,7 @@ End Sub
 Private Sub B4XPage_Created (Root1 As B4XView)
 	Root = Root1
 	Root.LoadLayout("MainPage")
+	B4XPages.SetTitle(Me, "Designer")
 	Conn.Initialize(CreateConnInfo)
 	If Conn.DBExist = False Then
 		Wait For (Conn.DBCreate) Complete (Success As Boolean)
@@ -54,22 +50,50 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 		For Each key As String In Tags.Keys
 			DB.Insert2(Array(key))
 		Next
-		DB.Table = "Lines"
-		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Text")))
-		DB.Create
-		DB.Columns = Array("Text")
 		
-		'Dim C1 As Map = EscPos.Custom
-		'DB.Insert2(Array($"${C1.Get("[CLEAR]")}${C1.Get("[CENTER]")}*** PRINT TEST ***"$)) ' Auto Linefeed
-		DB.Insert2(Array($"[CENTER]*** PRINT TEST ***"$)) ' Auto Linefeed
-		DB.Insert2(Array(""))
-		DB.Insert2(Array("R E C E I P T"))
-		DB.Insert2(Array(""))
-		'DB.Insert2(Array($"${EscPos.DrawCharLine("=", 40)}${C1.Get("LINEFEED")}"$))
-		DB.Insert2(Array($"[REPEAT,=,40]"$))
-		DB.Insert2(Array($"[LEFT]Date: 2025-08-04"$))
-		DB.Insert2(Array($" "$))
-		DB.Insert2(Array($"[RIGHT]MYR 99.25"$))
+		DB.Table = "Types"
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Text")))
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Encoding": "Text")))
+		DB.Create
+		DB.Columns = Array("Text", "Encoding")
+		DB.Insert2(Array("Ascii", "CP437"))
+		DB.Insert2(Array("Unicode", "UTF8"))
+		DB.Insert2(Array("Image", ""))
+		DB.Insert2(Array("Barcode", "ASCII"))
+		DB.Insert2(Array("QRCode", "ISO-8859-1"))
+		
+		DB.Table = "Settings"
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Name")))
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Key")))
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Value")))
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Active", "Type": DB.INTEGER, "Default": 1)))
+		DB.Create
+		DB.Columns = Array("Name", "Key", "Value", "Active")
+		DB.Insert2(Array("Auto Line Feed", "LINEFEED", 1, 1))
+		
+		DB.Table = "Lines"
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "seq", "Type": DB.INTEGER)))
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Text")))
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Type", "Type": DB.INTEGER, "Default": 1)))
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Active", "Type": DB.INTEGER, "Default": 1)))
+		DB.Create
+		DB.Columns = Array("seq", "Text", "Type", "Active")
+		DB.Insert2(Array(1, "[CENTER]", 1, 1)) ' Auto Linefeed
+		DB.Insert2(Array(2, "%LOGO%", 3, 1))
+		DB.Insert2(Array(3, "R E C E I P T", 1, 1))
+		DB.Insert2(Array(4, "", 1, 1))
+		DB.Insert2(Array(5, "================================", 1, 1))
+		DB.Insert2(Array(6, "[LEFT]Date: 2025-08-04", 1, 1))
+		DB.Insert2(Array(7, "", 1, 1))
+		DB.Insert2(Array(8, "[RIGHT]MYR 99.25", 1, 1))
+		DB.Insert2(Array(9, "", 1, 1))
+		DB.Insert2(Array(10, "[CENTER]中文测试", 2, 1))
+		DB.Insert2(Array(11, "1234567890123", 4, 1))
+		DB.Insert2(Array(12, "", 1, 1))
+		DB.Insert2(Array(13, "www.b4x.com", 5, 1))
+		DB.Insert2(Array(14, "[LINEFEED][LINEFEED]", 1, 1))
+		DB.Insert2(Array(15, "[FULLCUT]", 1, 1))
+		
 		Wait For (DB.ExecuteBatch) Complete (Success As Boolean)
 		If Success Then
 			Log(Success)
@@ -78,11 +102,14 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 		End If
 		DBClose
 	End If
+	
 	DB.Initialize(DBType, DBOpen)
 	DB.Table = "Lines"
+	DB.OrderBy = CreateMap("seq": "")
 	DB.Query
 	For Each row As Map In DB.Results
-		CLV1.Add(CreateListItem(row.Get("Text"), CLV1.AsView.Width, 70dip), row.Get("id"))
+		Dim item As LineItem = CreateLineItem(row.Get("Text"), row.Get("Type").As(Int), row.Get("Active").As(Int) = 1)
+		CLV1.Add(CreateListItem(item, CLV1.AsView.Width, 70dip), row.Get("seq"))
 	Next
 	DB.Close
 End Sub
@@ -129,20 +156,36 @@ Private Sub B4XPage_CloseRequest As ResumableSub
 End Sub
 #End If
 
-'Private Sub CreateListItem (FirstLine As String, SecondLine As String, Width As Int, Height As Int) As B4XView
-'	Dim p As B4XView = xui.CreatePanel("")
-'	p.LoadLayout("ListItem")
-'	p.SetLayoutAnimated(0, 0, 0, Width, Height)
-'	imgItem.Bitmap = xui.LoadBitmapResize(File.DirAssets, "icon.png", 40dip, 40dip, True)
-'	lblFirstLine.Text = FirstLine
-'	lblSecondLine.Text = SecondLine
-'	Return p
-'End Sub
-
-Private Sub CreateListItem (FirstLine As String, Width As Int, Height As Int) As B4XView
+Private Sub CreateListItem (Data As LineItem, Width As Int, Height As Int) As B4XView
 	Dim p As B4XView = xui.CreatePanel("")
 	p.LoadLayout("LineItem")
 	p.SetLayoutAnimated(0, 0, 0, Width, Height)
-	Label2.Text = FirstLine
+	Select Data.TypeId
+		Case 5 ' QR
+			Icon1.Text = Chr(0xF029)
+		Case 4 ' Barcode
+			Icon1.Text = Chr(0xF02A)
+		Case 3 ' Image
+			Icon1.Text = Chr(0xF1C5)
+		Case 2 ' Unicode
+			Icon1.Text = Chr(0xF1AB)
+		Case Else ' Text
+			Icon1.Text = Chr(0xF031)
+	End Select
+	If Data.Active Then
+		Icon2.Text = Chr(0xF06E)
+	Else
+		Icon2.Text = Chr(0xF070)
+	End If
+	LblText.Text = Data.Text
 	Return p
+End Sub
+
+Public Sub CreateLineItem (Text As String, TypeId As Int, Active As Boolean) As LineItem
+	Dim t1 As LineItem
+	t1.Initialize
+	t1.Text = Text
+	t1.TypeId = TypeId
+	t1.Active = Active
+	Return t1
 End Sub
