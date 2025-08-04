@@ -202,3 +202,29 @@ Public Sub Tags As Map
 	M2.Put("[t]", "t")
 	Return M2
 End Sub
+
+' Combination of more than 1 tag as shortcut
+Public Sub Custom As Map
+	Dim M3 As Map
+	M3.Initialize
+	M3.Put("[CLEAR]", "[ESC][@]")
+	M3.Put("[LINEFEED]", "[CR][LF]")
+	M3.Put("[LEFT]", "[ESC][a][NUL]")
+	M3.Put("[CENTER]", "[ESC][a][SOH]")
+	M3.Put("[RIGHT]", "[ESC][a][STX]")
+	M3.Put("[BOLD]", "[ESC][E][1]")
+	M3.Put("[UNBOLD]", "[ESC][E][0]")
+	M3.Put("[SINGLE]", "[ESC][!][0]")
+	M3.Put("[HIGH]", "[ESC][!][1]")
+	M3.Put("[WIDE]", "[ESC][!][2]")
+	M3.Put("[HIGHWIDE]", "[ESC][!][3]")
+	Return M3
+End Sub
+
+Public Sub DrawCharLine (DC As String, DL As Int) As String
+	Dim DS As String
+	For index = 0 To DL - 1
+		DS = DS & DC
+	Next
+	Return DS
+End Sub

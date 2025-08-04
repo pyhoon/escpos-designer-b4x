@@ -58,17 +58,17 @@ Sub Class_Globals
 	Dim NOBOLD As String = EscPos.ESC & "E0"
 	
 	' Character height and width
-	Dim SINGLE As String = GS & "!" & Chr(0x00) 'ignore
-	Dim HIGH As String = GS & "!" & Chr(0x01)	'ignore
-	Dim WIDE As String = GS & "!" & Chr(0x10)   'ignore
-	Dim HIGHWIDE As String = GS & "!" & Chr(0x11) 'ignore
+	Dim SINGLE As String = EscPos.GS & "!" & Chr(0x00) 'ignore
+	Dim HIGH As String = EscPos.GS & "!" & Chr(0x01)	'ignore
+	Dim WIDE As String = EscPos.GS & "!" & Chr(0x10)   'ignore
+	Dim HIGHWIDE As String = EscPos.GS & "!" & Chr(0x11) 'ignore
 	
 	' Default settings
 	Private LEFTJUSTIFY As String = EscPos.ESC & "a0"
 	Private LINEDEFAULT As String = EscPos.ESC & "2"
 	Private LINSET0 As String = EscPos.ESC & "$" & Chr(0x0) & Chr(0x0)
-	Private LMARGIN0 As String = GS & "L" & Chr(0x0) & Chr(0x0)
-	Private WIDTH0 As String = GS & "W" & Chr(0xff) & Chr(0xff)
+	Private LMARGIN0 As String = EscPos.GS & "L" & Chr(0x0) & Chr(0x0)
+	Private WIDTH0 As String = EscPos.GS & "W" & Chr(0xff) & Chr(0xff)
 	Private CHARSPACING0 As String = EscPos.ESC & " " & Chr(0)
 	Private CHARFONT0 As String = EscPos.ESC & "M" & Chr(0)
 	Dim DEFAULTS As String =  CHARSPACING0 & CHARFONT0 & LMARGIN0 & WIDTH0 & LINSET0 & LINEDEFAULT & LEFTJUSTIFY _

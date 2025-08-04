@@ -45,9 +45,7 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 		DB.Initialize(DBType, DBOpen)
 		DB.QueryAddToBatch = True
 		DB.ShowExtraLogs = True
-		DB.Table = "Lines"
-		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Text")))
-		DB.Create
+
 		DB.Table = "Tags"
 		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Text")))
 		DB.Create
@@ -56,6 +54,22 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 		For Each key As String In Tags.Keys
 			DB.Insert2(Array(key))
 		Next
+		DB.Table = "Lines"
+		DB.Columns.Add(DB.CreateColumn2(CreateMap("Name": "Text")))
+		DB.Create
+		DB.Columns = Array("Text")
+		
+		'Dim C1 As Map = EscPos.Custom
+		'DB.Insert2(Array($"${C1.Get("[CLEAR]")}${C1.Get("[CENTER]")}*** PRINT TEST ***"$)) ' Auto Linefeed
+		DB.Insert2(Array($"[CENTER]*** PRINT TEST ***"$)) ' Auto Linefeed
+		DB.Insert2(Array(""))
+		DB.Insert2(Array("R E C E I P T"))
+		DB.Insert2(Array(""))
+		'DB.Insert2(Array($"${EscPos.DrawCharLine("=", 40)}${C1.Get("LINEFEED")}"$))
+		DB.Insert2(Array($"[REPEAT,=,40]"$))
+		DB.Insert2(Array($"[LEFT]Date: 2025-08-04"$))
+		DB.Insert2(Array($" "$))
+		DB.Insert2(Array($"[RIGHT]MYR 99.25"$))
 		Wait For (DB.ExecuteBatch) Complete (Success As Boolean)
 		If Success Then
 			Log(Success)
@@ -65,7 +79,7 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 		DBClose
 	End If
 	DB.Initialize(DBType, DBOpen)
-	DB.Table = "Tags"
+	DB.Table = "Lines"
 	DB.Query
 	For Each row As Map In DB.Results
 		CLV1.Add(CreateListItem(row.Get("Text"), CLV1.AsView.Width, 70dip), row.Get("id"))
