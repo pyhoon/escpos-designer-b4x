@@ -21,7 +21,10 @@ Sub Class_Globals
 	Private Icon1 As B4XView
 	Private Icon2 As B4XView
 	Private LblText As B4XView
+	Private imgImage As ImageView
 	Private CLV1 As CustomListView
+	Private CLV2 As CustomListView
+	Private Justify As String
 	Type LineItem (Text As String, TypeId As Int, Active As Boolean)
 End Sub
 
@@ -109,7 +112,16 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 	DB.Query
 	For Each row As Map In DB.Results
 		Dim item As LineItem = CreateLineItem(row.Get("Text"), row.Get("Type").As(Int), row.Get("Active").As(Int) = 1)
-		CLV1.Add(CreateListItem(item, CLV1.AsView.Width, 70dip), row.Get("seq"))
+		CLV1.Add(CreateListItem1(item, CLV1.AsView.Width, 70dip), row.Get("seq"))
+		Select True
+			Case item.Text.Contains("[LEFT]")
+				Justify = "LEFT"
+			Case item.Text.Contains("[CENTER]")
+				Justify = "CENTER"
+			Case item.Text.Contains("[RIGHT]")
+				Justify = "RIGHT"
+		End Select
+		If item.Active Then CLV2.Add(CreateListItem2(item, CLV2.AsView.Width), row.Get("seq"))
 	Next
 	DB.Close
 End Sub
@@ -156,9 +168,9 @@ Private Sub B4XPage_CloseRequest As ResumableSub
 End Sub
 #End If
 
-Private Sub CreateListItem (Data As LineItem, Width As Int, Height As Int) As B4XView
+Private Sub CreateListItem1 (Data As LineItem, Width As Int, Height As Int) As B4XView
 	Dim p As B4XView = xui.CreatePanel("")
-	p.LoadLayout("LineItem")
+	p.LoadLayout("LineItem1")
 	p.SetLayoutAnimated(0, 0, 0, Width, Height)
 	Select Data.TypeId
 		Case 5 ' QR
@@ -178,6 +190,43 @@ Private Sub CreateListItem (Data As LineItem, Width As Int, Height As Int) As B4
 		Icon2.Text = Chr(0xF070)
 	End If
 	LblText.Text = Data.Text
+	Return p
+End Sub
+
+Private Sub CreateListItem2 (Data As LineItem, Width As Int) As B4XView
+	Dim Height As Int
+	Dim p As B4XView = xui.CreatePanel("")
+	Select Data.TypeId
+		Case 5 ' QR
+			p.LoadLayout("LineType5")
+			Height = 100dip
+		Case 4 ' Barcode
+			p.LoadLayout("LineType4")
+			Height = 60dip
+		Case 3 ' Image
+			p.LoadLayout("LineType3")
+			Height = 100dip
+		Case 2 ' Unicode
+			p.LoadLayout("LineType2")
+			Height = 40dip
+		Case Else ' Text
+			p.LoadLayout("LineType1")
+			Height = 40dip
+	End Select
+	Dim Value As String = Data.Text
+	Value = Value.Replace("[LEFT]", "")
+	Value = Value.Replace("[CENTER]", "")
+	Value = Value.Replace("[RIGHT]", "")
+	Value = Value.Replace("[LINEFEED]", CRLF)
+	LblText.Text = Value
+	Select Justify
+		Case "LEFT", "CENTER", "RIGHT"
+			LblText.SetTextAlignment("CENTER", Justify)
+		Case Else
+			LblText.SetTextAlignment("CENTER", "LEFT")
+	End Select
+	LblText.SetTextAlignment("CENTER", Justify)
+	p.SetLayoutAnimated(0, 0, 0, Width, Height)
 	Return p
 End Sub
 
