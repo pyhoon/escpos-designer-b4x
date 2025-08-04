@@ -34,28 +34,28 @@ Sub Class_Globals
 	'Dim EXC	As String = Chr(33) ' !
 	
 	'Bold and underline don't work well in reversed text
-	Dim UNREVERSE As String = Code.GS & "B" & Chr(0)
-	Dim REVERSE As String = Code.GS & "B" & Chr(1)	'ignore
+	Dim UNREVERSE As String = EscPos.GS & "B" & Chr(0)
+	Dim REVERSE As String = EscPos.GS & "B" & Chr(1)	'ignore
 	
 	' Character orientation. Print upside down from right margin
-	Dim UNINVERT As String = Code.ESC & "{0"
-	Dim INVERT As String = Code.ESC & "{1"	'ignore
+	Dim UNINVERT As String = EscPos.ESC & "{0"
+	Dim INVERT As String = EscPos.ESC & "{1"	'ignore
 	
 	' Character rotation clockwise. Not much use without also reversing the printed character sequence
-	Dim UNROTATE As String = Code.ESC & "V0"
-	Dim ROTATE As String = Code.ESC & "V1"	'ignore
+	Dim UNROTATE As String = EscPos.ESC & "V0"
+	Dim ROTATE As String = EscPos.ESC & "V1"	'ignore
 	
 	' Horizontal tab
 	Dim HT As String = Chr(9) 'ignore
 	
 	' Character underline
-	Dim ULINE0 As String = Code.ESC & "-0"
-	Dim ULINE1 As String = Code.ESC & "-1"	'ignore
-	Dim ULINE2 As String = Code.ESC & "-2"	'ignore
+	Dim ULINE0 As String = EscPos.ESC & "-0"
+	Dim ULINE1 As String = EscPos.ESC & "-1"	'ignore
+	Dim ULINE2 As String = EscPos.ESC & "-2"	'ignore
 	
 	' Character emphasis
-	Dim BOLD As String = Code.ESC & "E1"		'ignore
-	Dim NOBOLD As String = Code.ESC & "E0"
+	Dim BOLD As String = EscPos.ESC & "E1"		'ignore
+	Dim NOBOLD As String = EscPos.ESC & "E0"
 	
 	' Character height and width
 	Dim SINGLE As String = GS & "!" & Chr(0x00) 'ignore
@@ -64,13 +64,13 @@ Sub Class_Globals
 	Dim HIGHWIDE As String = GS & "!" & Chr(0x11) 'ignore
 	
 	' Default settings
-	Private LEFTJUSTIFY As String = Code.ESC & "a0"
-	Private LINEDEFAULT As String = Code.ESC & "2"
-	Private LINSET0 As String = Code.ESC & "$" & Chr(0x0) & Chr(0x0)
+	Private LEFTJUSTIFY As String = EscPos.ESC & "a0"
+	Private LINEDEFAULT As String = EscPos.ESC & "2"
+	Private LINSET0 As String = EscPos.ESC & "$" & Chr(0x0) & Chr(0x0)
 	Private LMARGIN0 As String = GS & "L" & Chr(0x0) & Chr(0x0)
 	Private WIDTH0 As String = GS & "W" & Chr(0xff) & Chr(0xff)
-	Private CHARSPACING0 As String = Code.ESC & " " & Chr(0)
-	Private CHARFONT0 As String = Code.ESC & "M" & Chr(0)
+	Private CHARSPACING0 As String = EscPos.ESC & " " & Chr(0)
+	Private CHARFONT0 As String = EscPos.ESC & "M" & Chr(0)
 	Dim DEFAULTS As String =  CHARSPACING0 & CHARFONT0 & LMARGIN0 & WIDTH0 & LINSET0 & LINEDEFAULT & LEFTJUSTIFY _
 		& UNINVERT & UNROTATE & UNREVERSE & NOBOLD & ULINE0		'ignore
 	#If B4A
@@ -231,7 +231,7 @@ End Sub
 ' A full character height is always fed even if units = 0. Units defines the excess over this minimum
 Public Sub PrintAndFeedPaper (units As Int)
 	'WriteString(ESC & "J")
-	WriteString(Code.ESC & Code.J)
+	WriteString(EscPos.ESC & EscPos.J)
 	Dim params(1) As Byte
 	params(0) = units
 	WriteBytes(params)
@@ -240,7 +240,7 @@ End Sub
 ' Set the distance between characters
 Public Sub setCharacterSpacing (spacing As Int)
 	'WriteString(ESC & " ")
-	WriteString(Code.ESC & Code.Space)
+	WriteString(EscPos.ESC & EscPos.Space)
 	Dim params(1) As Byte
 	params(0) = spacing
 	WriteBytes(params)
@@ -253,7 +253,7 @@ Public Sub setLeftInset(inset As Int)
 	Dim dh As Int = inset / 256
 	Dim dl As Int = inset - dh
 	'WriteString(ESC & "$" & Chr(dl) & Chr(dh))
-	WriteString(Code.ESC & Code.Dollar & Chr(dl) & Chr(dh))
+	WriteString(EscPos.ESC & EscPos.Dollar & Chr(dl) & Chr(dh))
 	Dim params(2) As Byte
 	params(0) = dl
 	params(1) = dh
@@ -267,7 +267,7 @@ Public Sub setLeftMargin(margin As Int)
 	Dim dh As Int = margin / 256
 	Dim dl As Int = margin - dh
 	'WriteString(GS & "L")
-	WriteString(Code.GS & Code.L)
+	WriteString(EscPos.GS & EscPos.L)
 	Dim params(2) As Byte
 	params(0) = dl
 	params(1) = dh
@@ -282,7 +282,7 @@ Public Sub setPrintWidth(width As Int)
 	Dim dh As Int = width / 256
 	Dim dl As Int = width - dh
 	'WriteString(GS & "W")
-	WriteString(Code.GS & Code.W)
+	WriteString(EscPos.GS & EscPos.W)
 	Dim params(2) As Byte
 	params(0) = dl
 	params(1) = dh
@@ -294,10 +294,10 @@ End Sub
 Public Sub setLineSpacing(spacing As Int)
 	If spacing < 0 Then
 		'WriteString(ESC & "2")
-		WriteString(Code.ESC & Code.Num2)
+		WriteString(EscPos.ESC & EscPos.Num2)
 	Else
 		'WriteString(ESC & "3")
-		WriteString(Code.ESC & Code.Num3)
+		WriteString(EscPos.ESC & EscPos.Num3)
 		Dim params(1) As Byte
 		params(0) = spacing
 		WriteBytes(params)
@@ -322,7 +322,7 @@ End Sub
 ' You need to look at the printer documentation to establish which codepages are supported
 Public Sub setCodePage (codepage As Int)
 	'WriteString(ESC & "t")
-	WriteString(Code.ESC & Code.LC_t)
+	WriteString(EscPos.ESC & EscPos.LC_t)
 	Dim params(1) As Byte
 	params(0) = codepage
 	WriteBytes(params)
@@ -336,7 +336,7 @@ End Sub
 ' On my printer setting UseCustomCharacters = while Font B is selected crashes the printer and turns it off
 Public Sub setCharacterFont (font As Int)
 	'WriteString(ESC & "M" & Chr(Bit.And(1, font)))
-	WriteString(Code.ESC & Code.M & Chr(Bit.And(1, font)))
+	WriteString(EscPos.ESC & EscPos.M & Chr(Bit.And(1, font)))
 End Sub
 
 ' Set the positions of the horizontal tabs
@@ -345,7 +345,7 @@ End Sub
 ' The printer default is that no tabs are defined
 Public Sub setTabPositions(tabs() As Int)
 	'WriteString(ESC & "D")
-	WriteString(Code.ESC & Code.D)
+	WriteString(EscPos.ESC & EscPos.D)
 	Dim data(tabs.Length+1) As Byte
 	For i = 0 To tabs.Length - 1
 		data(i) = tabs(i)
@@ -362,7 +362,7 @@ Public Sub setRelativePrintPosn(relposn As Int)
 	Dim dh As Int = relposn / 256
 	Dim dl As Int = relposn - dh
 	'WriteString(ESC & "\")
-	WriteString(Code.ESC & Code.BackSlash)
+	WriteString(EscPos.ESC & EscPos.BackSlash)
 	Dim params(2) As Byte
 	params(0) = dl
 	params(1) = dh
@@ -413,7 +413,7 @@ End Sub
 ' This command deletes the pattern defined for the specified code in the font selected by ESC !
 ' If the code is subsequently printed in custom character mode the present code page character is printed instead
 Public Sub DeleteCustomCharacter(charcode As Int)
-	WriteString(Code.ESC & Code.Question)
+	WriteString(EscPos.ESC & EscPos.Question)
 	Dim params(1) As Byte
 	params(0) = charcode
 	WriteBytes(params)	
@@ -427,10 +427,10 @@ End Sub
 Public Sub setUseCustomCharacters(custom As Boolean)
 	If custom Then
 		'WriteString(ESC & "%1")
-		WriteString(Code.ESC & Code.Percent & Code.Num1)
+		WriteString(EscPos.ESC & EscPos.Percent & EscPos.Num1)
 	Else
 		'WriteString(ESC & "%0")
-		WriteString(Code.ESC & Code.Percent & Code.Num0)
+		WriteString(EscPos.ESC & EscPos.Percent & EscPos.Num0)
 	End If
 End Sub
 
@@ -454,7 +454,7 @@ Public Sub DefineCustomCharacter(charcode As Int, bitdata() As Byte) As Int
 	If excess <> 0 Then Return -1
 	Dim size As Int = bitdata.Length / 3
 	'WriteString(ESC & "&")
-	WriteString(Code.ESC & Code.Ampersand)
+	WriteString(EscPos.ESC & EscPos.Ampersand)
 	Dim params(4) As Byte
 	params(0) = 3
 	params(1) = charcode
@@ -956,7 +956,7 @@ Public Sub PrintImage (img As AnImage) As Int
 	params(2) = xh
 	params(3) = yl
 	params(4) = yh
-	WriteString(Code.GS & "v0")
+	WriteString(EscPos.GS & "v0")
 	WriteBytes(params)
 	WriteBytes(img.data)
 	WriteString(CRLF)
@@ -1032,25 +1032,25 @@ End Sub
 '   MSB of each byte is the highest image pixel, the LSB is the lowest
 Public Sub PrintImage2 (width As Int, data() As Byte, highdensity As Boolean, dotds24 As Boolean) As Int
 	'Dim d As String = Chr(0)
-	Dim d As String = Code.NUL
+	Dim d As String = EscPos.NUL
 	If Not(highdensity) And Not(dotds24 )	 Then
 		'd = Chr(0)
-		d = Code.NUL
+		d = EscPos.NUL
 		If width > 288 Then Return -1
 		If data.Length <> width Then Return -3
 	Else If highdensity And Not(dotds24) 	 Then
 		'd = Chr(1)
-		d = Code.SOH
+		d = EscPos.SOH
 		If width > 576 Then Return -1
 		If data.Length <> width Then Return -3
 	Else If Not(highdensity) And dotds24 	 Then
 		'd = Chr(32)
-		d = Code.Space
+		d = EscPos.Space
 		If width > 288 Then Return -1
 		If data.Length <> width*3 Then Return -3
 	Else  ' highdensity And dotds24
 		'd = Chr(33)
-		d = Code.Exclamation
+		d = EscPos.Exclamation
 		If width > 576 Then Return -1
 		If data.Length <> width*3 Then Return -3
 	End If
@@ -1059,7 +1059,7 @@ Public Sub PrintImage2 (width As Int, data() As Byte, highdensity As Boolean, do
 	Dim params(2) As Byte
 	params(0) = xl
 	params(1) = xh
-	WriteString(Code.ESC & Code.Astericks & d)
+	WriteString(EscPos.ESC & EscPos.Astericks & d)
 	WriteBytes(params)	
 	WriteBytes(data)
 	WriteString(CRLF)
@@ -1128,7 +1128,7 @@ End Sub
 ' Set the height of a 2D bar code as number of dots vertically, 1 to 255
 ' Automatically resets to the default after printing the barcode
 Public Sub setBarCodeHeight (height As Int)
-	WriteString(Code.GS & "h")
+	WriteString(EscPos.GS & "h")
 	Dim params(1) As Byte
 	params(0) = height
 	WriteBytes(params)
@@ -1137,43 +1137,43 @@ End Sub
 ' Set the left inset of a 2D barcode, 0 to 255
 ' This does not reset on receipt of RESET
 Public Sub setBarCodeLeft (left As Int)
-	WriteString(Code.GS & "x")
+	WriteString(EscPos.GS & "x")
 	Dim params(1) As Byte
 	params(0) = left
 	WriteBytes(params)
 End Sub
 
-' Set the width of each bar in a 2D barcode. width value is 2 to 6, default is 3
+' Set the width of each bar in a 2D barEscPos. width value is 2 to 6, default is 3
 ' 2 = 0.250, 3 - 0.375, 4 = 0.560, 5 = 0.625, 6 = 0.75
 ' Resets to default after printing the barcode
 Public Sub setBarCodeWidth (width As Int)
-	WriteString(Code.GS & "w")
+	WriteString(EscPos.GS & "w")
 	Dim params(1) As Byte
 	params(0) = width
 	WriteBytes(params)
 End Sub
 
-'Selects the printing position of HRI (Human Readable Interpretation) characters when printing a 2D bar code.
+'Selects the printing position of HRI (Human Readable Interpretation) characters when printing a 2D bar EscPos.
 '0 Not printed, 1 Above the bar code, 2 Below the bar code, 3 Both above And below the bar code
 ' Automatically resets to the default of 0 after printing the barcode
 ' The docs say this can be Chr(0, 1 2 or 3) or "0" "1" "2" or "3" but the numeric characters don't work
 Public Sub setHriPosn (posn As Int)
-	WriteString(Code.GS & "H")
+	WriteString(EscPos.GS & "H")
 	Dim params(1) As Byte
 	params(0) = posn
 	WriteBytes(params)
 End Sub
 
-'Selects the font for HRI (Human Readable Interpretation) characters when printing a 2D bar code.
+'Selects the font for HRI (Human Readable Interpretation) characters when printing a 2D bar EscPos.
 '0 Font A (12 x 24), 1 Font B (9 x 17)
 ' Automatically resets to the default of 0 after printing the barcode
 ' The docs say this can be Chr(0 or 1) or "0" or "1" but the numeric characters don't work
 Public Sub setHriFont (font As Int)
-	WriteString(Code.GS & "f" & Chr(font))
+	WriteString(EscPos.GS & "f" & Chr(font))
 End Sub
 
 ' If given invalid data no barcode is printed, only strange characters 
-' CODABAR needs any of A,B,C or D at the start and end of the barcode. Some decoders may not like them anywhere else
+' CODABAR needs any of A,B,C or D at the start and end of the barEscPos. Some decoders may not like them anywhere else
 ' Bartype   Code     Number of characters   Permitted values
 '       A | UPC-A  | 11 or 12 characters  | 0 to 9 | The 12th printed character is always the check digit
 '       B | UPC-E  | 6 characters         | 0 to 9 | The 12th printed character is always the check digit
@@ -1188,7 +1188,7 @@ Public Sub WriteBarCode (bartype As String, data As String)
 	Dim databytes() As Byte = data.GetBytes("ASCII")
 	Dim dlow As Int = databytes.Length
 	Log("Barcode " & bartype & ", Size " & dlow & ", " & data)
-	WriteString(Code.GS & "k" & bartype.ToUpperCase.CharAt(0))
+	WriteString(EscPos.GS & "k" & bartype.ToUpperCase.CharAt(0))
 	Dim params(1) As Byte
 	params(0) = dlow
 	WriteBytes(params)
@@ -1210,7 +1210,7 @@ Public Sub WriteQRCode (size As Int, EC As String, scale As Int, data As String)
 	params(1) = dlow
 	params(2) = dhigh
 	'WriteString(ESC & "Z" & Chr(size) & EC.ToUpperCase.CharAt(0))
-	WriteString(Code.ESC & Code.Z & Chr(size) & EC.ToUpperCase.CharAt(0))
+	WriteString(EscPos.ESC & EscPos.Z & Chr(size) & EC.ToUpperCase.CharAt(0))
 	WriteBytes(params)
 	WriteBytes(databytes)
 End Sub
