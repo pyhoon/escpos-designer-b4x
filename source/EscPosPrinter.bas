@@ -26,13 +26,6 @@ Sub Class_Globals
 	Private Connected As Boolean
 	Private ConnectedError As String
 	
-	Public Encoder As EscPosEncoder
-	'Dim ESC As String = Chr(27)
-	'Dim FS As String = Chr(28)	'ignore
-	'Dim GS As String = Chr(29)
-	'Dim AT As String = Chr(64) ' @
-	'Dim EXC	As String = Chr(33) ' !
-	
 	'Bold and underline don't work well in reversed text
 	Dim UNREVERSE As String = EscPos.GS & "B" & Chr(0)
 	Dim REVERSE As String = EscPos.GS & "B" & Chr(1)	'ignore
@@ -88,7 +81,6 @@ End Sub
 Public Sub Initialize (vCallback As Object, vEventName As String)
 	EventName = vEventName
 	CallBack = vCallback
-	Encoder.Initialize
 	Serial1.Initialize("Serial1")
 	Connected = False
 	ConnectedError = ""
@@ -219,7 +211,7 @@ End Sub
 ' Reset the printer to the power on state
 Public Sub Reset
 	'WriteString(ESC & "@")
-	WriteString(Encoder.E_RESET)
+	WriteString(EscPos.ESC & EscPos.At)
 End Sub
 
 '--------------
@@ -310,11 +302,11 @@ Public Sub setJustify (justify As Int)
 	'WriteString(ESC & "a" & Chr(justify + 48))
 	Select justify
 		Case 0
-			WriteString(Encoder.E_JUSTIFY_LEFT)
+			WriteString(EscPos.ESC & EscPos.LC_a & EscPos.Num0)
 		Case 1
-			WriteString(Encoder.E_JUSTIFY_CENTER)
+			WriteString(EscPos.ESC & EscPos.LC_a & EscPos.Num1)
 		Case 2
-			WriteString(Encoder.E_JUSTIFY_RIGHT)
+			WriteString(EscPos.ESC & EscPos.LC_a & EscPos.Num2)
 	End Select
 End Sub
 

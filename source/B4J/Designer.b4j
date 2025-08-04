@@ -1,19 +1,35 @@
 ﻿AppType=JavaFX
 Build1=Default,b4j.example
-File1=LineItem1.bjl
-File2=LineType1.bjl
-File3=LineType2.bjl
-File4=LineType3.bjl
-File5=LineType4.bjl
-File6=LineType5.bjl
-File7=MainPage.bjl
+File1=ean13.gif
+File10=Property1.bjl
+File11=Property2.bjl
+File12=Property3.bjl
+File13=Property4.bjl
+File14=Property5.bjl
+File15=qrcode.gif
+File2=LineItem1.bjl
+File3=LineType1.bjl
+File4=LineType2.bjl
+File5=LineType3.bjl
+File6=LineType4.bjl
+File7=LineType5.bjl
+File8=logo.png
+File9=MainPage.bjl
 FileGroup1=Default Group
+FileGroup10=Default Group
+FileGroup11=Default Group
+FileGroup12=Default Group
+FileGroup13=Default Group
+FileGroup14=Default Group
+FileGroup15=Default Group
 FileGroup2=Default Group
 FileGroup3=Default Group
 FileGroup4=Default Group
 FileGroup5=Default Group
 FileGroup6=Default Group
 FileGroup7=Default Group
+FileGroup8=Default Group
+FileGroup9=Default Group
 Group=App
 Library1=b4xpages
 Library2=jcore
@@ -24,11 +40,10 @@ Library6=miniormutils
 Library7=xui views
 Module1=|relative|..\B4XMainPage
 Module2=|relative|..\EscPos
-Module3=|relative|..\EscPosEncoder
-Module4=|relative|..\EscPosPrinter
-NumberOfFiles=7
+Module3=|relative|..\EscPosPrinter
+NumberOfFiles=15
 NumberOfLibraries=7
-NumberOfModules=4
+NumberOfModules=3
 Version=10.3
 @EndOfDesignText@
 #Region Project Attributes 
@@ -36,7 +51,7 @@ Version=10.3
 	#MainFormHeight: 640
 #End Region
 #AdditionalJar: sqlite-jdbc-3.7.2
-#PackagerProperty: ExeName = Receipt Designer
+#PackagerProperty: ExeName = Receipt Editor
 Sub Process_Globals
 	Private fx As JFX
 	Private MainForm As Form
