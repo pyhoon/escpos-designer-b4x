@@ -24,6 +24,7 @@ Sub Class_Globals
 	Private LblText As B4XView
 	Private imgImage As ImageView
 	Private imgBarcode As ImageView
+	Private LblLine As B4XView
 	Private LblTitle As B4XView
 	Private TxtValue As B4XView
 	Private CmbValue As B4XComboBox
@@ -131,13 +132,14 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 	Next
 	DB.Close
 	Dim Values As List = Array("Ascii", "Unicode", "Image", "Barcode", "QRCode")
+	CLV3.Add(CreateListItem3(CreateLineProp("Line: Not selected", "Label", Values), CLV3.AsView.Width), 0)
 	CLV3.Add(CreateListItem3(CreateLineProp("Type", "Option", Values), CLV3.AsView.Width), 1)
 	CLV3.Add(CreateListItem3(CreateLineProp("Visible", "Option", Array("True", "False")), CLV3.AsView.Width), 2)
 	CLV3.Add(CreateListItem3(CreateLineProp("Value", "Input", Null), CLV3.AsView.Width), 3)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove1", Null), CLV3.AsView.Width), 4)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove2", Null), CLV3.AsView.Width), 4)
 	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonAddDelete", Null), CLV3.AsView.Width), 4)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonSavePrint", Null), CLV3.AsView.Width), 4)
+	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove1", Null), CLV3.AsView.Width), 5)
+	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove2", Null), CLV3.AsView.Width), 6)
+	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonSavePrint", Null), CLV3.AsView.Width), 7)
 End Sub
 
 Private Sub CreateConnInfo As ConnectionInfo
@@ -251,6 +253,10 @@ Private Sub CreateListItem3 (Data As LineProp, Width As Int) As B4XView
 	Dim Height As Int
 	Dim p As B4XView = xui.CreatePanel("")
 	Select Data.TypeView
+		Case "Label"
+			p.LoadLayout("Property0")
+			LblLine.Text = Data.Title
+			Height = 40dip
 		Case "Option"
 			p.LoadLayout("Property1")
 			LblTitle.Text = Data.Title
