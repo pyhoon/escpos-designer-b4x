@@ -98,9 +98,9 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 		DB.Insert2(Array(9, "9236320210046", 4, 1))
 		DB.Insert2(Array(10, "", 1, 1))
 		DB.Insert2(Array(11, "www.b4x.com", 5, 1))
-		DB.Insert2(Array(12, "[LINEFEED]", 1, 1))
-		DB.Insert2(Array(13, "[LINEFEED]", 1, 1))
-		DB.Insert2(Array(14, "[LINEFEED]", 1, 1))
+		DB.Insert2(Array(12, "", 1, 1))
+		DB.Insert2(Array(13, "", 1, 1))
+		DB.Insert2(Array(14, "", 1, 1))
 		DB.Insert2(Array(15, "[FULLCUT]", 1, 1))
 		
 		Wait For (DB.ExecuteBatch) Complete (Success As Boolean)
@@ -134,9 +134,10 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 	CLV3.Add(CreateListItem3(CreateLineProp("Type", "Option", Values), CLV3.AsView.Width), 1)
 	CLV3.Add(CreateListItem3(CreateLineProp("Visible", "Option", Array("True", "False")), CLV3.AsView.Width), 2)
 	CLV3.Add(CreateListItem3(CreateLineProp("Value", "Input", Null), CLV3.AsView.Width), 3)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove", Null), CLV3.AsView.Width), 4)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonSave", Null), CLV3.AsView.Width), 4)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonPrint", Null), CLV3.AsView.Width), 4)
+	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove1", Null), CLV3.AsView.Width), 4)
+	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove2", Null), CLV3.AsView.Width), 4)
+	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonAddDelete", Null), CLV3.AsView.Width), 4)
+	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonSavePrint", Null), CLV3.AsView.Width), 4)
 End Sub
 
 Private Sub CreateConnInfo As ConnectionInfo
@@ -260,14 +261,17 @@ Private Sub CreateListItem3 (Data As LineProp, Width As Int) As B4XView
 			LblTitle.Text = Data.Title
 			TxtValue.Text = "[LEFT]  Date: 2025-08-04"
 			Height = 40dip
-		Case "ButtonMove"
+		Case "ButtonMove1"
 			p.LoadLayout("Property3")
 			Height = 70dip
-		Case "ButtonSave"
+		Case "ButtonMove2"
 			p.LoadLayout("Property4")
 			Height = 70dip
-		Case "ButtonPrint"
+		Case "ButtonAddDelete"
 			p.LoadLayout("Property5")
+			Height = 70dip
+		Case "ButtonSavePrint"
+			p.LoadLayout("Property6")
 			Height = 70dip
 	End Select
 	p.SetLayoutAnimated(0, 0, 0, Width, Height)
@@ -290,4 +294,12 @@ Public Sub CreateLineProp (Title As String, TypeView As String, Values As List) 
 	t1.TypeView = TypeView
 	t1.Values = Values
 	Return t1
+End Sub
+
+Private Sub BtnMoveTop_Click
+	
+End Sub
+
+Private Sub BtnMoveBottom_Click
+	
 End Sub
