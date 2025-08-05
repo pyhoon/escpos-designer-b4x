@@ -25,13 +25,17 @@ Sub Class_Globals
 	Private imgImage As ImageView
 	Private imgBarcode As ImageView
 	Private LblLine As B4XView
-	Private LblTitle As B4XView
-	Private TxtValue As B4XView
-	Private CmbValue As B4XComboBox
+	Private LblTitle2 As B4XView
+	Private LblTitle3 As B4XView
+	Private LblTitle4 As B4XView
+	Private TxtValue4 As B4XView
+	Private CmbValue2 As B4XComboBox
+	Private CmbValue3 As B4XComboBox
 	Private CLV1 As CustomListView
 	Private CLV2 As CustomListView
 	Private CLV3 As CustomListView
 	Private Justify As String
+	Private SelectedLine As Int
 	Type LineItem (Text As String, TypeId As Int, Active As Boolean)
 	Type LineProp (Title As String, TypeView As String, Values As List)
 End Sub
@@ -119,7 +123,7 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 	DB.Query
 	For Each row As Map In DB.Results
 		Dim item As LineItem = CreateLineItem(row.Get("Text"), row.Get("Type").As(Int), row.Get("Active").As(Int) = 1)
-		CLV1.Add(CreateListItem1(item, CLV1.AsView.Width, 70dip), row.Get("seq"))
+		CLV1.Add(CreateListItem1(item, CLV1.AsView.Width, 70dip), item)
 		Select True
 			Case item.Text.Contains("[LEFT]")
 				Justify = "LEFT"
@@ -128,13 +132,13 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 			Case item.Text.Contains("[RIGHT]")
 				Justify = "RIGHT"
 		End Select
-		If item.Active Then CLV2.Add(CreateListItem2(item, CLV2.AsView.Width), row.Get("seq"))
+		If item.Active Then CLV2.Add(CreateListItem2(item, CLV2.AsView.Width), item)
 	Next
 	DB.Close
 	Dim Values As List = Array("Ascii", "Unicode", "Image", "Barcode", "QRCode")
 	CLV3.Add(CreateListItem3(CreateLineProp("Line: Not selected", "Label", Values), CLV3.AsView.Width), 0)
-	CLV3.Add(CreateListItem3(CreateLineProp("Type", "Option", Values), CLV3.AsView.Width), 1)
-	CLV3.Add(CreateListItem3(CreateLineProp("Visible", "Option", Array("True", "False")), CLV3.AsView.Width), 2)
+	CLV3.Add(CreateListItem3(CreateLineProp("Type", "Option1", Values), CLV3.AsView.Width), 1)
+	CLV3.Add(CreateListItem3(CreateLineProp("Visible", "Option2", Array("False", "True")), CLV3.AsView.Width), 2)
 	CLV3.Add(CreateListItem3(CreateLineProp("Value", "Input", Null), CLV3.AsView.Width), 3)
 	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonAddDelete", Null), CLV3.AsView.Width), 4)
 	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove1", Null), CLV3.AsView.Width), 5)
@@ -254,30 +258,35 @@ Private Sub CreateListItem3 (Data As LineProp, Width As Int) As B4XView
 	Dim p As B4XView = xui.CreatePanel("")
 	Select Data.TypeView
 		Case "Label"
-			p.LoadLayout("Property0")
+			p.LoadLayout("Property1")
 			LblLine.Text = Data.Title
 			Height = 40dip
-		Case "Option"
-			p.LoadLayout("Property1")
-			LblTitle.Text = Data.Title
-			CmbValue.SetItems(Data.Values)
+		Case "Option1"
+			p.LoadLayout("Property2")
+			LblTitle2.Text = Data.Title
+			CmbValue2.SetItems(Data.Values)
+			Height = 40dip
+		Case "Option2"
+			p.LoadLayout("Property3")
+			LblTitle3.Text = Data.Title
+			CmbValue3.SetItems(Data.Values)
 			Height = 40dip
 		Case "Input"
-			p.LoadLayout("Property2")
-			LblTitle.Text = Data.Title
-			TxtValue.Text = "[LEFT]  Date: 2025-08-04"
+			p.LoadLayout("Property4")
+			LblTitle4.Text = Data.Title
+			TxtValue4.Text = ""
 			Height = 40dip
 		Case "ButtonMove1"
-			p.LoadLayout("Property3")
-			Height = 70dip
-		Case "ButtonMove2"
-			p.LoadLayout("Property4")
-			Height = 70dip
-		Case "ButtonAddDelete"
 			p.LoadLayout("Property5")
 			Height = 70dip
-		Case "ButtonSavePrint"
+		Case "ButtonMove2"
 			p.LoadLayout("Property6")
+			Height = 70dip
+		Case "ButtonAddDelete"
+			p.LoadLayout("Property7")
+			Height = 70dip
+		Case "ButtonSavePrint"
+			p.LoadLayout("Property8")
 			Height = 70dip
 	End Select
 	p.SetLayoutAnimated(0, 0, 0, Width, Height)
@@ -308,4 +317,20 @@ End Sub
 
 Private Sub BtnMoveBottom_Click
 	
+End Sub
+
+Private Sub CLV1_ItemClick (Index As Int, Value As Object)
+	CLV1.GetPanel(SelectedLine).Color = xui.Color_Transparent
+	CLV1.GetPanel(Index).Color = xui.Color_RGB(126, 180, 250)
+	SelectedLine = Index
+	LblLine.Text = "Line: " & (Index + 1)
+	Dim Data As LineItem = Value 
+	CmbValue2.SelectedIndex = Data.TypeId - 1
+	CmbValue3.SelectedIndex = IIf(Data.Active, 1, 0)
+	TxtValue4.Text = Data.Text
+End Sub
+
+Private Sub CLV2_ItemClick (Index As Int, Value As Object)
+	CLV1_ItemClick(Index, Value)
+	'Log(Value)
 End Sub
