@@ -17,6 +17,7 @@ Sub Class_Globals
 	Public DB As MiniORM
 	Private Conn As ORMConnector
 	Private xui As XUI
+	Private fx As JFX
 	Private Root As B4XView
 	Private Icon1 As B4XView
 	Private Icon2 As B4XView
@@ -34,6 +35,8 @@ Sub Class_Globals
 	Private CLV1 As CustomListView
 	Private CLV2 As CustomListView
 	Private CLV3 As CustomListView
+	Private DragSceneY As Double
+	Private SBV As JavaObject
 	Private Justify As String
 	Private SelectedLine As Int
 	Type LineItem (Text As String, TypeId As Int, Active As Boolean)
@@ -135,6 +138,7 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 		If item.Active Then CLV2.Add(CreateListItem2(item, CLV2.AsView.Width), item)
 	Next
 	DB.Close
+	EnableDragScroll(CLV2)
 	Dim Values As List = Array("Ascii", "Unicode", "Image", "Barcode", "QRCode")
 	CLV3.Add(CreateListItem3(CreateLineProp("Line: Not selected", "Label", Values), CLV3.AsView.Width), 0)
 	CLV3.Add(CreateListItem3(CreateLineProp("Type", "Option1", Values), CLV3.AsView.Width), 1)
@@ -144,6 +148,61 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove1", Null), CLV3.AsView.Width), 5)
 	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove2", Null), CLV3.AsView.Width), 6)
 	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonSavePrint", Null), CLV3.AsView.Width), 7)
+End Sub
+
+' Enable click-and-drag scrolling for a CustomListView
+Private Sub EnableDragScroll (clv As CustomListView)
+	Dim spJO As JavaObject = clv.sv
+	'Attach all event filters in one go
+    AddEventFilter(spJO, "MOUSE_PRESSED", "SPPressed")
+    AddEventFilter(spJO, "MOUSE_RELEASED", "SPReleased")
+    AddEventFilter(spJO, "MOUSE_DRAGGED", "SPDragged")
+	'Cache the vertical scrollbar for later calculations
+    Sleep(0) ' wait for UI to build
+    SBV = GetScrollBar(spJO, "VERTICAL")
+End Sub
+
+' Utility to attach JavaFX event filters
+Private Sub AddEventFilter (target As JavaObject, eventName As String, handlerName As String)
+    Dim EventHandler As Object = target.CreateEvent("javafx.event.EventHandler", handlerName, Null)
+    Dim MouseEvent As JavaObject
+    MouseEvent.InitializeStatic("javafx.scene.input.MouseEvent")
+    target.RunMethod("addEventFilter", Array(MouseEvent.GetField(eventName), EventHandler))
+End Sub
+
+' Utility to get a ScrollBar JavaObject
+Public Sub GetScrollBar (Node As JavaObject, Orientation As String) As JavaObject
+    Dim SBSet As JavaObject = Node.RunMethod("lookupAll", Array(".scroll-bar"))
+    Dim Iterator As JavaObject = SBSet.RunMethod("iterator", Null)
+    Do While Iterator.RunMethod("hasNext", Null)
+        Dim SB As JavaObject = Iterator.RunMethod("next", Null)
+        Dim SBOrientation As String = SB.RunMethodJO("getOrientation", Null).RunMethod("toString", Null)
+        If SBOrientation = Orientation.ToUpperCase Then Return SB
+    Loop
+    Return SB
+End Sub
+
+' Event Handlers
+Private Sub SPPressed_Event (MethodName As String, Args() As Object)
+    Dim Event As JavaObject = Args(0)
+    DragSceneY = Event.RunMethod("getY", Null)
+End Sub
+
+Private Sub SPReleased_Event (MethodName As String, Args() As Object)
+    Dim SP As ScrollPane = Sender
+    'SP.MouseCursor = fx.Cursors.DEFAULT
+    If Initialized(SP.MouseCursor) And SP.MouseCursor = fx.Cursors.MOVE Then SP.MouseCursor = fx.Cursors.DEFAULT
+End Sub
+
+Private Sub SPDragged_Event (MethodName As String, Args() As Object)
+    Dim SP As ScrollPane = Sender
+    SP.MouseCursor = fx.Cursors.MOVE
+    Dim Event As JavaObject = Args(0)
+    Dim ThisY As Double = Event.RunMethod("getY", Null)
+    Dim contentHeight As Double = SP.InnerNode.PrefHeight
+    Dim visibleHeight As Double = SBV.RunMethod("getVisibleAmount", Null) * contentHeight
+    SP.VPosition = SP.VPosition + (DragSceneY - ThisY) / (contentHeight - visibleHeight)
+    DragSceneY = ThisY
 End Sub
 
 Private Sub CreateConnInfo As ConnectionInfo
