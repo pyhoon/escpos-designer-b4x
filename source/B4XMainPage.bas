@@ -139,15 +139,18 @@ Private Sub B4XPage_Created (Root1 As B4XView)
 	Next
 	DB.Close
 	EnableDragScroll(CLV2)
-	Dim Values As List = Array("Ascii", "Unicode", "Image", "Barcode", "QRCode")
-	CLV3.Add(CreateListItem3(CreateLineProp("Line: Not selected", "Label", Values), CLV3.AsView.Width), 0)
-	CLV3.Add(CreateListItem3(CreateLineProp("Type", "Option1", Values), CLV3.AsView.Width), 1)
-	CLV3.Add(CreateListItem3(CreateLineProp("Visible", "Option2", Array("False", "True")), CLV3.AsView.Width), 2)
-	CLV3.Add(CreateListItem3(CreateLineProp("Value", "Input", Null), CLV3.AsView.Width), 3)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonAddDelete", Null), CLV3.AsView.Width), 4)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove1", Null), CLV3.AsView.Width), 5)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonMove2", Null), CLV3.AsView.Width), 6)
-	CLV3.Add(CreateListItem3(CreateLineProp("", "ButtonSavePrint", Null), CLV3.AsView.Width), 7)
+	Dim Values As List = Array As String("Ascii", "Unicode", "Image", "Barcode", "QRCode")
+	Dim Titles As List = Array As String("Line: Not selected", "Type", "Visible", "Value", "", "", "", "")
+	Dim TypeViews As List = Array As String("Label", "Option1", "Option2", "Input", "ButtonAddDelete", "ButtonMove1", "ButtonMove2", "ButtonSavePrint")
+	For i = 0 To 7
+		If i = 1 Then
+			CLV3.Add(CreateListItem3(CreateLineProp(Titles.Get(i), TypeViews.Get(i), Values), CLV3.AsView.Width), i)
+		Else If i = 2 Then
+			CLV3.Add(CreateListItem3(CreateLineProp(Titles.Get(i), TypeViews.Get(i), Array("False", "True")), CLV3.AsView.Width), i)
+		Else
+			CLV3.Add(CreateListItem3(CreateLineProp(Titles.Get(i), TypeViews.Get(i), Null), CLV3.AsView.Width), i)
+		End If
+	Next
 End Sub
 
 ' Enable click-and-drag scrolling for a CustomListView
